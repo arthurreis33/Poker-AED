@@ -73,7 +73,7 @@ int main(){
 void enqueue(Card **head, Card **tail, int cardValue, int cardSuit){
     /* enfileira as cartas na mão de cada jogador, mesa ou cpu;
     */
-   Card newcard = (Card)malloc(sizeof(Card));
+   Card* newcard = (Card *)malloc(sizeof(Card));
 
    if(newcard != NULL){
 
