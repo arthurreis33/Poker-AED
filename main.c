@@ -12,7 +12,7 @@ typedef struct Card{
 void enqueue(Card **head, Card **tail, int cardValue, int cardSuit);
 void initCards(Card **head, Card **tail);
 int currentLengthCards(Card *head);
-void deliverCards();
+void deliverCards(Card **sourceHead, Card **sourceTail,  Card **destinationHead, Card **destinationTail, int i);
 void insertionSort(Card *head); 
 void displayCards(Card *head, int i);
 void concatenateQueues(Card **head_01, Card **tail_01, Card **head_02, Card **tail_02); 
@@ -29,44 +29,53 @@ int main(){
     int fichasCPU = 100; 
     
     while(1){
-        printf("Bem Vindo ao Poker");
-    
-        //selecionando cartas jogadores
-        for (int i = 0; i<2; i++){
-            //usar rand pra gerar numeros aleatórios
-            enqueue(&headPlayer, &tailPlayer, cardValue, cardSuit);
-        }
-    
-        for (int i = 0; i<2; i++){
-            //usar rand pra gerar numeros aleatórios
-            enqueue(&headCPU  , &tailCPU, cardValue, cardSuit);
-        }
+        printf("Bem Vindo ao Poker!\n");
+        initCards(&headCheap, &tailCheap);
 
+        //selecionando cartas jogadores    
+        deliverCards(&headCheap, &tailCheap, &headPlayer, &tailPlayer, 2);
+
+        //selecionando cartas para o computador 
+        deliverCards(&headCheap, &tailCheap, &headCPU, &tailCPU, 2);
+
+        //mostrando as cartas do jogador
         displayCards(headPlayer, 0);//cartas jogador
-        //mesa 3 iniciais
 
+        
         //perguntar ao jogador se ele vai entrar no jogo; custo = 5 fichas;
         //reduzir 5 fichas no montante do jogador e da cpu;
         
-        for (int i = 0; i<3; i++){
-            enqueue(&headDealer, &tailDealer, cardValue, cardSuit); 
-        }
+        //selecionando as 3 cartas inicias da mesa
+        deliverCards(&headCheap, &tailCheap, &headDealer, &tailDealer, 3);
+        
+        //mostrando as cartas da mesa
+        displayCards(headDealer, 1);
 
-        displayCards(headDealer, 1); //cartas da mesa
-        //completar depois o print
+
         //rodada de aposta
         //jogador deve apostar primeiro, CPU deve cobrir a aposta;
         //colocar condição no inicio do jogo, caso a cpu esteja quebrada, termina o jogo e dá exit;
-        //mesa 2 finais
+        
+        
+        //selecionando as 2 cartas finais do jogo
+        deliverCards(&headCheap, &tailCheap, &headDealer, &tailDealer, 2);
 
-        for(int i = 0; i<2; i++){
-            enqueue(&headDealer, &tailDealer, cardValue, cardSuit); 
-        }
+        //mostrando as 3 cartas iniciais + 2 finais
+        displayCards(headDealer, 1);
+
         //rodada de aposta final
+
+        //comparando os jogos e printando o vencedor
         compare(); //compara os jogos
+
+        int leaveGame;
+        printf("Deseja continuar no jogo? \n[0] para continuar \t|\t [1] para sair\n");
+        if(leaveGame==1){
+            break;
+        }
         
     }
-
+    printf("\nFim do Jogo. Obrigado por jogar.\n");
     return 0;
 }
 
@@ -127,7 +136,7 @@ void deliverCards(Card **sourceHead, Card **sourceTail,  Card **destinationHead,
 
     for(int j = 0; j<i; j++){
         int currentLength = currentLengthCards(sourceHead);
-        int cardNumber = rand() % currentLength;
+        int cardNumber = rand() % currentLength-1;
 
         Card *current = *sourceHead;
 
@@ -135,7 +144,7 @@ void deliverCards(Card **sourceHead, Card **sourceTail,  Card **destinationHead,
 
             if(a == cardNumber){
                 enqueue(&destinationHead, &destinationTail, current->valueCard, current->suitCard);
-                removeAtAnyPoint(&destinationHead, &destinationTail, a);
+                removeAtAnyPoint(&sourceHead, &sourceTail, a);
             }
 
             current=current->next;
@@ -281,7 +290,7 @@ void concatenateQueues(Card **head_01, Card **tail_01, Card **head_02, Card **ta
     }
 }
 
-void removeAtAnyPoint(Card** head, Card** tail, int i) {
+void removeAtAnyPoint(Card **head, Card **tail, int i) {
     if (*head == NULL) {
         printf("Empty list\n");
         return;
