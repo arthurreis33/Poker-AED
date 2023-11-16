@@ -73,7 +73,7 @@ int main(){
 void enqueue(Card **head, Card **tail, int cardValue, int cardSuit){
     /* enfileira as cartas na mão de cada jogador, mesa ou cpu;
     */
-   Card *newcard = (Card*)malloc(sizeof(Card));
+   Card newcard = (Card)malloc(sizeof(Card));
 
    if(newcard != NULL){
 
@@ -281,34 +281,33 @@ void concatenateQueues(Card **head_01, Card **tail_01, Card **head_02, Card **ta
     }
 }
 
-void removeAtAnyPoint(Card **head, Card **tail, int i){
-
-}
-
-void removeAtAnyPoin(Card **head, Card **tail, Card *nodeToRemove) {
-    if (*head == NULL || nodeToRemove == NULL) {
-        // List is empty or node to remove is not provided
+void removeAtAnyPoint(Card** head, Card** tail, int i) {
+    if (*head == NULL) {
+        printf("Empty list\n");
         return;
     }
 
-    if (nodeToRemove->prev != NULL) {
-        // Update the previous node's next pointer
-        nodeToRemove->prev->next = nodeToRemove->next;
-    } else {
-        // Node to remove is the head, update the head
-        *head = nodeToRemove->next;
+    struct Card* current = *head;
+    int currentPosition = 0;
+
+    while (current != NULL && currentPosition < i) {
+        current = current->next;
+        currentPosition++;
     }
 
-    if (nodeToRemove->next != NULL) {
-        // Update the next node's previous pointer
-        nodeToRemove->next->prev = nodeToRemove->prev;
+    if (current->prev != NULL) {
+        current->prev->next = current->next;
     } else {
-        // Node to remove is the tail, update the tail
-        *tail = nodeToRemove->prev;
+        *head = current->next;
     }
 
-    // Free the memory of the removed node
-    free(nodeToRemove);
+    if (current->next != NULL) {
+        current->next->prev = current->prev;
+    } else {
+        *tail = current->prev;
+    }
+    
+    free(current);
 }
 
 
