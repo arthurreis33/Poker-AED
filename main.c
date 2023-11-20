@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 typedef struct Card{
     int valueCard;
@@ -16,7 +17,16 @@ void deliverCards(Card **sourceHead, Card **sourceTail,  Card **destinationHead,
 void insertionSort(Card *head); 
 void displayCards(Card *head, int i);
 void concatenateQueues(Card **head_01, Card **tail_01, Card **head_02, Card **tail_02); 
-int compare();
+int compare(Card *hand);
+bool isRoyalStraightFlush(Card *hand);
+bool isStraightFlush(Card *hand);
+bool isFourOfAKind(Card *hand);
+bool isFullHouse(Card *hand);
+bool isFlush(Card *hand);
+bool isStraight(Card *hand);
+bool isThreeOfAKind(Card *hand);
+bool isTwoPair(Card *hand);
+bool isOnePair(Card *hand);
 void removeAtAnyPoint(Card **head, Card **tail, int i);
 
 int main(){
@@ -27,6 +37,9 @@ int main(){
     int cardValue, cardSuit;
     int fichasPlayer = 100;
     int fichasCPU = 100; 
+    int fichasNaAposta = 0;
+
+
     
     while(1){
         printf("Bem Vindo ao Poker!\n");
@@ -43,6 +56,25 @@ int main(){
 
         
         //perguntar ao jogador se ele vai entrar no jogo; custo = 5 fichas;
+        printf("Vai entrar na partida (Custo 5 fichas)? [0] para não [1] para sim\n ");
+        int keepOnGame;
+        scanf("%d", &keepOnGame);
+
+        if (keepOnGame == 0){
+            int sairDoJogo;
+            printf("Deseja sair do jogo? [0] para não [1] para sim\n");
+            scanf("%d", &sairDoJogo);
+            if(sairDoJogo = 0 ){
+                continue;
+            }else{
+                break;
+            }
+        }
+
+        fichasPlayer = fichasPlayer -5;
+        fichasCPU = fichasCPU -5;
+
+
         //reduzir 5 fichas no montante do jogador e da cpu;
         
         //selecionando as 3 cartas inicias da mesa
@@ -53,8 +85,24 @@ int main(){
 
 
         //rodada de aposta
-        //jogador deve apostar primeiro, CPU deve cobrir a aposta;
-        //colocar condição no inicio do jogo, caso a cpu esteja quebrada, termina o jogo e dá exit;
+        printf("%d \n Jogador, qual sua aposta?");
+        int aposta1;
+        scanf("%d", &aposta1);
+
+        if(aposta1>fichasPlayer);
+            printf("Você não pode apostar mais do que tem!!!");
+            int apostaCorreta;
+            scanf("%d", &apostaCorreta);
+            aposta1 = apostaCorreta;
+            
+        fichasPlayer = fichasPlayer - aposta1;
+
+        if(aposta1>fichasCPU){
+            printf("CPU não tem a quantidade de fichas suficientes... Você o superou! \n Saindo do jogo.");
+            break;
+        }
+
+        fichasCPU = fichasCPU - aposta1;
         
         
         //selecionando as 2 cartas finais do jogo
@@ -64,9 +112,37 @@ int main(){
         displayCards(headDealer, 1);
 
         //rodada de aposta final
+        printf("%d \n Jogador, qual sua aposta?");
+        int aposta2;
+        scanf("%d", &aposta2);
 
-        //comparando os jogos e printando o vencedor
-        compare(); //compara os jogos
+        if(aposta1>fichasPlayer);
+            printf("Você não pode apostar mais do que tem!!!");
+            int apostaCorreta;
+            scanf("%d", &apostaCorreta);
+            aposta2 = apostaCorreta;
+            
+        fichasPlayer = fichasPlayer - aposta2;
+
+        if(aposta1>fichasCPU){
+            printf("CPU não tem a quantidade de fichas suficientes... Você o superou! \n Saindo do jogo.");
+            break;
+        }
+        
+        int handPlayer = compare(headPlayer);
+        int handCPU = compare(headCPU);
+
+        if(handPlayer>handCPU){
+            fichasPlayer = fichasPlayer + aposta1 + aposta2;
+            fichasCPU = fichasCPU - aposta1 - aposta2;
+            printf("Parabéns! Você ganhou!");
+        }else if (handCPU>handPlayer){
+            fichasPlayer = fichasPlayer - aposta1 - aposta2;
+            fichasCPU = fichasCPU + aposta1 + aposta2;
+            printf("Você perdeu. ");
+        }else{
+
+        }
 
         int leaveGame;
         printf("Deseja continuar no jogo? \n[0] para continuar \t|\t [1] para sair\n");
@@ -107,7 +183,7 @@ void initCards(Card **head, Card **tail){ //criação baralho
 
         for(int j = 1; j < 14; j++){
 
-            enqueue(&head, &tail, j, i);
+            enqueue(head, tail, j, i);
 
         }
     }
@@ -135,7 +211,7 @@ void deliverCards(Card **sourceHead, Card **sourceTail,  Card **destinationHead,
     // se estiver na ultima execução, enqueue a carta 
 
     for(int j = 0; j<i; j++){
-        int currentLength = currentLengthCards(sourceHead);
+        int currentLength = currentLengthCards(*sourceHead);
         int cardNumber = rand() % currentLength-1;
 
         Card *current = *sourceHead;
@@ -143,8 +219,8 @@ void deliverCards(Card **sourceHead, Card **sourceTail,  Card **destinationHead,
         for(int a = 0; a <= cardNumber; a++){
 
             if(a == cardNumber){
-                enqueue(&destinationHead, &destinationTail, current->valueCard, current->suitCard);
-                removeAtAnyPoint(&sourceHead, &sourceTail, a);
+                enqueue(destinationHead, destinationTail, current->valueCard, current->suitCard);
+                removeAtAnyPoint(sourceHead, sourceTail, a);
             }
 
             current=current->next;
@@ -209,64 +285,64 @@ void displayCards(Card *head, int i){
     
     while(head != NULL){
         if (head->suitCard = 0){ //naipe de espadas
-            if(head->valueCard = 1){//Ás de Espadas
+            if(head->valueCard == 1){//Ás de Espadas
                 printf("A|Espadas");
             }
-            else if(head->valueCard = 11){//Valete de Espadas
+            else if(head->valueCard == 11){//Valete de Espadas
                 printf("J|Espadas");
             }
-            else if(head->valueCard = 12){//Rainha de Espadas
+            else if(head->valueCard == 12){//Rainha de Espadas
                 printf("Q|Espadas");
             }
-            else if(head->valueCard = 13){//Rei de Espadas
+            else if(head->valueCard == 13){//Rei de Espadas
                 printf("K|Espadas");
             }
             else{// valor 2<=x<=10 de espadas
                 printf("%d|Espadas", head->valueCard); 
             }
-        }else if (head->suitCard = 1){ //naipe de paus
-            if(head->valueCard = 1){//Ás de Paus
+        }else if (head->suitCard == 1){ //naipe de paus
+            if(head->valueCard == 1){//Ás de Paus
                 printf("A|Paus");
             }
-            else if(head->valueCard = 11){//Valete de Paus
+            else if(head->valueCard == 11){//Valete de Paus
                 printf("J|Paus");
             }
-            else if(head->valueCard = 12){//Rainha de Paus
+            else if(head->valueCard == 12){//Rainha de Paus
                 printf("Q|Paus");
             }
-            else if(head->valueCard = 13){//Rei de Paus
+            else if(head->valueCard == 13){//Rei de Paus
                 printf("K|Paus");
             }
             else{// valor 2<=x<=10 de Paus
                 printf("%d|Paus", head->valueCard);
             }
-        }else if (head->suitCard = 2){ //naipe de Copas
-            if(head->valueCard = 1){//Ás de Copas
+        }else if (head->suitCard == 2){ //naipe de Copas
+            if(head->valueCard == 1){//Ás de Copas
                 printf("A|Copas");
             }
-            else if(head->valueCard = 11){//Valete de Copas
+            else if(head->valueCard == 11){//Valete de Copas
                 printf("J|Copas");
             }
-            else if(head->valueCard = 12){//Rainha de Copas
+            else if(head->valueCard == 12){//Rainha de Copas
                 printf("Q|Copas");
             }
-            else if(head->valueCard = 13){//Rei de Copas
-                printf("K|Copas");  
+            else if(head->valueCard == 13){//Rei de Copas
+                printf("K|Copas");
             }
             else{// valor 2<=x<=10 de Copas
                 printf("%d|Copas", head->valueCard);
             }
-        }else if (head->suitCard = 3){ //naipe de Ouro
-            if(head->valueCard = 1){//Ás de Ouro
+        }else if (head->suitCard == 3){ //naipe de Ouro
+            if(head->valueCard == 1){//Ás de Ouro
                 printf("A|Ouro");
             }
-            else if(head->valueCard = 11){//Valete de Ouro
+            else if(head->valueCard == 11){//Valete de Ouro
                 printf("J|Ouro");
             }
-            else if(head->valueCard = 12){//Rainha de Ouro
+            else if(head->valueCard == 12){//Rainha de Ouro
                 printf("Q|Ouro");
             }
-            else if(head->valueCard = 13){//Rei de Ouro
+            else if(head->valueCard == 13){//Rei de Ouro
                 printf("K|Ouro");
             }
             else{// valor 2<=x<=10 de Ouro
@@ -292,7 +368,6 @@ void concatenateQueues(Card **head_01, Card **tail_01, Card **head_02, Card **ta
 
 void removeAtAnyPoint(Card **head, Card **tail, int i) {
     if (*head == NULL) {
-        printf("Empty list\n");
         return;
     }
 
@@ -321,30 +396,277 @@ void removeAtAnyPoint(Card **head, Card **tail, int i) {
 
 
 //função para comparar as cartas
-int compare(){
-    
-    // regras para cada mão
+int compare(Card *hand) {
+    if (isRoyalStraightFlush(hand)) {
+        return 10;
+    } else if (isStraightFlush(hand)) {
+        return 9;
+    } else if (isFourOfAKind(hand)) {
+        return 8;
+    } else if (isFullHouse(hand)) {
+        return 7;
+    } else if (isFlush(hand)) {
+        return 6;
+    } else if (isStraight(hand)) {
+        return 5;
+    } else if (isThreeOfAKind(hand)) {
+        return 4;
+    } else if (isTwoPair(hand)) {
+        return 3;
+    } else if (isOnePair(hand)) {
+        return 2;
+    } else {
+        return 1; // High Card
+    }
+}
 
-    // royal straight flush - sequencia mais alta ou seja de 9 a Ás, de mesmo naipe 
+bool isRoyalStraightFlush(Card *hand) {
+    // Verifica se é um Royal Straight Flush (sequência de 10 a Ás do mesmo naipe)
+    int count = 0;
+    int expectedValue = 10;
+    int expectedSuit = hand->suitCard;
 
-    // straight flush - sequencia de mesmo naipe
+    while (hand != NULL) {
+        if (hand->valueCard == expectedValue && hand->suitCard == expectedSuit) {
+            count++;
+            expectedValue++;
+        } else if (hand->valueCard == 1 && hand->suitCard == expectedSuit) {
+            // Ás
+            count++;
+            expectedValue = 2; // Continua a sequência após o Ás
+        } else {
+            count = 0;
+            expectedValue = 10;
+        }
 
-    // four of a kind - 4 cartas de mesmo valor
+        if (count == 5) {
+            return true; // Encontrou uma sequência de 10 a Ás do mesmo naipe
+        }
 
-    // full house - uma trinca e um par
+        hand = hand->next;
+    }
 
-    // flush - todas as cartas do mesmo naipe
+    return false;
+}
 
-    // straight - sequencia, de qualquer naipe 
+bool isStraightFlush(Card *hand) {
+    // Verifica se é um Straight Flush (sequência de cartas do mesmo naipe)
+    int count = 0;
+    int expectedValue = hand->valueCard;
+    int expectedSuit = hand->suitCard;
 
-    // trinca - 3 cartas de mesmo valor
+    while (hand != NULL) {
+        if (hand->valueCard == expectedValue && hand->suitCard == expectedSuit) {
+            count++;
+            expectedValue++;
+        } else {
+            count = 0;
+            expectedValue = hand->valueCard + 1; // Reinicia a sequência
+        }
 
-    // dois pares - bem óbvio essa né, qualquer naipe
+        if (count == 5) {
+            return true; // Encontrou uma sequência do mesmo naipe
+        }
 
-    // um par - bem obvio essa tb
+        hand = hand->next;
+    }
 
-    // carta mais alta - caso nenhum jogador possuir nenhuma combinação, ganha quem tiver a carta mais alta
+    return false;
+}
 
-    return -1; // so pra não dar erro
+bool isFourOfAKind(Card *hand) {
+    int count;
+    int currentValue;
 
+    // Percorre cada valor de carta possível
+    for (int value = 1; value <= 13; value++) {
+        count = 0;
+        currentValue = value;
+
+        // Percorre a mão contando o número de cartas com o mesmo valor
+        while (hand != NULL) {
+            if (hand->valueCard == currentValue) {
+                count++;
+            }
+
+            if (count == 4) {
+                return true; // Encontrou quatro cartas do mesmo valor
+            }
+
+            hand = hand->next;
+        }
+    }
+
+    return false; // Não encontrou quatro cartas do mesmo valor
+}
+
+bool isFullHouse(Card *hand) {
+    int countTrinca = 0;
+    int countPar = 0;
+    int currentValue;
+
+    // Percorre cada valor de carta possível
+    for (int value = 1; value <= 13; value++) {
+        currentValue = value;
+
+        // Percorre a mão contando o número de cartas com o mesmo valor
+        while (hand != NULL) {
+            if (hand->valueCard == currentValue) {
+                if (countTrinca == 0) {
+                    countTrinca++;
+                } else if (countPar == 0) {
+                    countPar++;
+                } else {
+                    countTrinca = 1;
+                    countPar = 0;
+                }
+            }
+
+            hand = hand->next;
+        }
+
+        if (countTrinca == 1 && countPar == 1) {
+            return true; // Encontrou um full house
+        }
+    }
+
+    return false; // Não encontrou full house
+}
+
+bool isFlush(Card *hand) {
+    int countSpades = 0;
+    int countHearts = 0;
+    int countDiamonds = 0;
+    int countClubs = 0;
+    while (hand != NULL) {
+        switch (hand->suitCard) {
+            case 0: // Espadas
+                countSpades++;
+                break;
+            case 1: // Paus
+                countClubs++;
+                break;
+            case 2: // Copas
+                countHearts++;
+                break;
+            case 3: // Ouro
+                countDiamonds++;
+                break;
+        }
+
+        hand = hand->next;
+    }
+
+    return countSpades >= 5 || countClubs >= 5 || countHearts >= 5 || countDiamonds >= 5;
+}
+
+
+bool isStraight(Card *head) {
+    // Ordenar as cartas antes de verificar a sequência
+    insertionSort(head);
+
+    int count = 0;
+    int expectedValue = head->valueCard;
+
+    while (head != NULL) {
+        if (head->valueCard == expectedValue) {
+            count++;
+            expectedValue++;
+        } else {
+            count = 0;
+            expectedValue = head->valueCard + 1; // Reinicia a sequência
+        }
+
+        if (count == 5) {
+            return true; // Encontrou uma sequência
+        }
+
+        head = head->next;
+    }
+
+    return false;
+}
+
+bool isThreeOfAKind(Card *hand) {
+    int count;
+    int currentValue;
+
+    // Percorre cada valor de carta possível
+    for (int value = 1; value <= 13; value++) {
+        count = 0;
+        currentValue = value;
+
+        // Percorre a mão contando o número de cartas com o mesmo valor
+        while (hand != NULL) {
+            if (hand->valueCard == currentValue) {
+                count++;
+            }
+
+            if (count == 3) {
+                return true; // Encontrou três cartas do mesmo valor
+            }
+
+            hand = hand->next;
+        }
+    }
+
+    return false; // Não encontrou três cartas do mesmo valor
+}
+
+bool isTwoPair(Card *hand) {
+    int countPairs = 0;
+    int firstPairValue = 0;
+    int secondPairValue = 0;
+
+    // Percorre cada valor de carta possível
+    for (int value = 1; value <= 13; value++) {
+        int count = 0;
+
+        // Percorre a mão contando o número de cartas com o mesmo valor
+        while (hand != NULL) {
+            if (hand->valueCard == value) {
+                count++;
+            }
+
+            hand = hand->next;
+        }
+
+        if (count == 2) {
+            // Encontrou um par
+            countPairs++;
+
+            if (countPairs == 1) {
+                firstPairValue = value;
+            } else if (countPairs == 2) {
+                secondPairValue = value;
+            }
+        }
+    }
+
+    return countPairs == 2 && firstPairValue != secondPairValue;
+}
+
+bool isOnePair(Card *hand) {
+    int countPairs = 0;
+
+    // Percorre cada valor de carta possível
+    for (int value = 1; value <= 13; value++) {
+        int count = 0;
+
+        // Percorre a mão contando o número de cartas com o mesmo valor
+        while (hand != NULL) {
+            if (hand->valueCard == value) {
+                count++;
+            }
+
+            hand = hand->next;
+        }
+
+        if (count == 2) {
+            // Encontrou um par
+            countPairs++;
+        }
+    }
+
+    return countPairs == 1;
 }
